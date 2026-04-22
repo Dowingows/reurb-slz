@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# REURB-SLZ
 
-## Getting Started
+Sistema PWA de Regularização Fundiária Urbana. Permite que agentes de campo cadastrem beneficiários offline e supervisores gerenciem projetos, campanhas e revisem cadastros.
 
-First, run the development server:
+## Stack
+
+Next.js 14 · TypeScript · PostgreSQL (Supabase) · Prisma · NextAuth v5 · Tailwind CSS · shadcn/ui
+
+## Início rápido
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+git clone https://github.com/Dowingows/reurb-slz.git
+cd reurb-slz
+pnpm install
+cp .env.example .env   # preencher com credenciais do Supabase
+pnpm db:migrate
+pnpm db:seed
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse http://localhost:3000 e entre com `supervisor@reurb.dev` / `senha123`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Perfis
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Perfil | Acesso |
+|---|---|
+| `CADASTRADOR` | PWA mobile (`/campo`) — cadastro offline |
+| `SUPERVISOR` | Dashboard web — gestão e revisão |
+| `ADMIN` | Dashboard + configurações do sistema |
 
-## Learn More
+## Documentação
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [STATUS.md](./STATUS.md) — o que já funciona, como testar e o que falta
+- [PLAN.md](./PLAN.md) — plano de implementação por fases, setup detalhado e decisões técnicas
+- [AGENTS.md](./AGENTS.md) — modelagem de dados, schema Prisma e arquitetura do sistema
