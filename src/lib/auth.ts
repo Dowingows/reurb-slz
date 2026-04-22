@@ -2,9 +2,11 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { authConfig } from "@/lib/auth.config";
 import type { Role } from "@prisma/client";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
@@ -39,8 +41,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.role = token.role as Role;
       return session;
     },
-  },
-  pages: {
-    signIn: "/login",
   },
 });
