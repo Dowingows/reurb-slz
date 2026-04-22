@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { projetoSchema, type ProjetoFormData } from "@/schemas/projeto.schema";
 import { ComboboxIBGE, useEstados, useMunicipios } from "./ComboboxIBGE";
 import { AnexoUpload, type AnexoPendente } from "./AnexoUpload";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,9 +31,13 @@ export function ProjetoForm({ defaultValues }: Props) {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProjetoFormData>({
+  const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<ProjetoFormData>({
     resolver: zodResolver(projetoSchema),
-    defaultValues,
+    defaultValues: {
+      nome: defaultValues?.nome ?? "",
+      estado: defaultValues?.estado ?? "",
+      municipio: defaultValues?.municipio ?? "",
+    },
   });
 
   const estados = useEstados();
@@ -95,23 +99,38 @@ export function ProjetoForm({ defaultValues }: Props) {
 
           <div className="space-y-1">
             <Label>Estado</Label>
-            <ComboboxIBGE
-              placeholder="Selecione o estado"
-              value={estadoSelecionado ?? ""}
-              onChange={(val) => { setValue("estado", val); setValue("municipio", ""); }}
-              items={estados}
+            <Controller
+              control={control}
+              name="estado"
+              render={({ field }) => (
+                <ComboboxIBGE
+                  placeholder="Selecione o estado"
+                  value={field.value}
+                  onChange={(val) => {
+                    field.onChange(val);
+                    setValue("municipio", "");
+                  }}
+                  items={estados}
+                />
+              )}
             />
             {errors.estado && <p className="text-sm text-destructive">{errors.estado.message}</p>}
           </div>
 
           <div className="space-y-1">
             <Label>Cidade</Label>
-            <ComboboxIBGE
-              placeholder="Selecione a cidade"
-              value={watch("municipio") ?? ""}
-              onChange={(val) => setValue("municipio", val)}
-              items={municipios}
-              disabled={!estadoSelecionado}
+            <Controller
+              control={control}
+              name="municipio"
+              render={({ field }) => (
+                <ComboboxIBGE
+                  placeholder="Selecione a cidade"
+                  value={field.value}
+                  onChange={field.onChange}
+                  items={municipios}
+                  disabled={!estadoSelecionado}
+                />
+              )}
             />
             {errors.municipio && <p className="text-sm text-destructive">{errors.municipio.message}</p>}
           </div>
@@ -135,7 +154,7 @@ export function ProjetoForm({ defaultValues }: Props) {
       {erro && <p className="text-sm text-destructive">{erro}</p>}
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={loading}>
+        <Button type="button" onClick={handleSubmit(onSubmit)} disabled={loading}>
           {loading ? "Salvando..." : isEditing ? "Salvar alterações" : "Criar projeto"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
