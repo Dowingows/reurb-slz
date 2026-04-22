@@ -1,0 +1,207 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// AUTH / USUÁRIOS
+
+model User {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  role      Role     @default(CADASTRADOR)
+  ativo     Boolean  @default(true)
+  criadoEm DateTime @default(now())
+
+  cadastros        Cadastro[]
+  campanhasAbertas Campanha[] @relation("CampanhaAbertaPor")
+}
+
+enum Role {
+  CADASTRADOR
+  SUPERVISOR
+  ADMIN
+}
+
+// PROJETO REURB
+
+model ProjetoReurb {
+  id           String     @id @default(cuid())
+  nome         String
+  municipio    String
+  estado       String
+  modalidade   Modalidade
+  criadoEm     DateTime   @default(now())
+  atualizadoEm DateTime   @updatedAt
+
+  campanhas Campanha[]
+}
+
+enum Modalidade {
+  SOCIAL
+  ESPECIFICO
+}
+
+// CAMPANHA
+
+model Campanha {
+  id           String         @id @default(cuid())
+  projetoId    String
+  projeto      ProjetoReurb   @relation(fields: [projetoId], references: [id])
+  nome         String
+  bairro       String
+  status       StatusCampanha @default(RASCUNHO)
+  abertaPorId  String
+  abertaPor    User           @relation("CampanhaAbertaPor", fields: [abertaPorId], references: [id])
+  abertaEm     DateTime       @default(now())
+  encerradaEm  DateTime?
+  atualizadoEm DateTime       @updatedAt
+
+  lotes     Lote[]
+  cadastros Cadastro[]
+}
+
+enum StatusCampanha {
+  RASCUNHO
+  ATIVA
+  ENCERRADA
+}
+
+// LOTE
+
+model Lote {
+  id                   String   @id @default(cuid())
+  campanhaId           String
+  campanha             Campanha @relation(fields: [campanhaId], references: [id])
+  numeroLote           String
+  quadra               String
+  areaM2               Float
+  inscricaoImobiliaria String?
+  confrontanteFrente   String?
+  confrontanteFundo    String?
+  confrontanteLd       String?
+  confrontanteLe       String?
+  medidaFrente         Float?
+  medidaFundo          Float?
+  medidaLd             Float?
+  medidaLe             Float?
+  coordenadas          Json?
+
+  cadastros Cadastro[]
+
+  @@unique([campanhaId, quadra, numeroLote])
+}
+
+// BENEFICIÁRIO
+
+model Beneficiario {
+  id                String       @id @default(cuid())
+  nome              String
+  cpf               String       @unique
+  rg                String?
+  dataNascimento    DateTime?
+  estadoCivil       EstadoCivil?
+  conjugeNome       String?
+  conjugeCpf        String?
+  conjugeRg         String?
+  nis               String?
+  rendaFamiliar     Float?
+  possuiOutroImovel Boolean      @default(false)
+  criadoEm          DateTime     @default(now())
+  atualizadoEm      DateTime     @updatedAt
+
+  cadastros Cadastro[]
+}
+
+enum EstadoCivil {
+  SOLTEIRO
+  CASADO
+  UNIAO_ESTAVEL
+  DIVORCIADO
+  VIUVO
+}
+
+// CADASTRO
+
+model Cadastro {
+  id                   String         @id @default(cuid())
+  uuidLocal            String         @unique
+  loteId               String
+  lote                 Lote           @relation(fields: [loteId], references: [id])
+  campanhaId           String
+  campanha             Campanha       @relation(fields: [campanhaId], references: [id])
+  beneficiarioId       String
+  beneficiario         Beneficiario   @relation(fields: [beneficiarioId], references: [id])
+  criadoPorId          String
+  criadoPor            User           @relation(fields: [criadoPorId], references: [id])
+
+  tempoPosseInicio     DateTime?
+  tipoAquisicao        TipoAquisicao?
+  linhaSucessoria      String?
+  declaracaoNaoLitigio Boolean        @default(false)
+
+  gpsLat      Float?
+  gpsLng      Float?
+  gpsAccuracy Float?
+
+  status         StatusCadastro @default(PENDENTE)
+  motivoRejeicao String?
+  revisadoPorId  String?
+  revisadoEm     DateTime?
+
+  criadoEm       DateTime  @default(now())
+  sincronizadoEm DateTime?
+  atualizadoEm   DateTime  @updatedAt
+
+  documentos Documento[]
+}
+
+enum StatusCadastro {
+  PENDENTE
+  APROVADO
+  REJEITADO
+  ARQUIVADO
+}
+
+enum TipoAquisicao {
+  COMPRA_VENDA
+  DOACAO
+  HERANCA
+  POSSE
+  OUTROS
+}
+
+// DOCUMENTO
+
+model Documento {
+  id           String        @id @default(cuid())
+  cadastroId   String
+  cadastro     Cadastro      @relation(fields: [cadastroId], references: [id])
+  tipo         TipoDocumento
+  supabasePath String
+  nomeOriginal String?
+  tamanhoBytes Int?
+  conferido    Boolean       @default(false)
+  enviadoEm    DateTime      @default(now())
+}
+
+enum TipoDocumento {
+  RG
+  CPF
+  RG_CONJUGE
+  CPF_CONJUGE
+  CERTIDAO_CASAMENTO
+  CERTIDAO_NASCIMENTO
+  COMPROVANTE_ENDERECO
+  COMPROVANTE_ENDERECO_IMOVEL
+  RECIBO_COMPRA_VENDA
+  DECLARACAO_POSSE
+  CERTIDAO_DEBITOS_MUNICIPAIS
+  NIS
+  OUTROS
+}
