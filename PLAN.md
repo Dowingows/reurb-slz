@@ -113,18 +113,40 @@ INNGEST_SIGNING_KEY=...
 
 ---
 
-### Fase 2 — Projetos e campanhas `semanas 3–4`
-> Supervisor cria projeto, campanha e importa lotes do Excel.
+### Fase 2 — CRUD de Projetos REURB `semana 3`
+> Supervisor cria e gerencia projetos com seus documentos.
 
-- [ ] Migrations: ProjetoReurb, Campanha, Lote
-- [ ] CRUD ProjetoReurb (listagem, criação, edição)
+- [ ] Atualizar schema: remover `modalidade`, adicionar `DocumentoProjetoReurb`
+- [ ] Migration e geração do Prisma Client
+- [ ] Criar bucket `projetos` no Supabase Storage
+- [ ] Listagem de projetos (`/dashboard/projetos`)
+- [ ] Formulário de criação/edição com:
+  - Nome do projeto (texto)
+  - Estado (autocomplete via API IBGE)
+  - Cidade (autocomplete dependente do estado via API IBGE)
+  - Upload de anexos por tipo:
+    - Memorial descritivo
+    - Foto do projeto
+    - Levantamento topográfico
+    - Relatório ambiental
+    - Relatório urbanístico
+    - Relatório jurídico
+    - Relatório socioeconômico
+- [ ] API routes: `GET/POST /api/projetos`, `GET/PUT/DELETE /api/projetos/[id]`
+- [ ] Upload de arquivos para Supabase Storage com URL assinada
+
+**Entregável:** supervisor cria, edita e visualiza projetos com documentos anexados.
+
+---
+
+### Fase 2.5 — Campanhas e Lotes *(próxima iteração)*
+> Supervisor cria campanha vinculada a projeto e importa lotes do Excel.
+
+- [ ] Migrations: Campanha, Lote
 - [ ] CRUD Campanha (listagem por projeto, criação, transição de status)
-- [ ] Importador de lotes via Excel (SheetJS)
-  - Parser para o formato Morada do Sol (cada aba = uma quadra)
-  - Endpoint `POST /api/campanhas/[id]/lotes/import`
-  - Validação Zod + feedback de erros por linha
+- [ ] Importador de lotes via Excel (SheetJS — formato Morada do Sol)
 - [ ] Cadastro manual de lote (fallback)
-- [ ] Tela de progresso da campanha (lotes vs cadastros por quadra)
+- [ ] Tela de progresso da campanha
 
 **Entregável:** supervisor cria campanha completa com lotes importados.
 

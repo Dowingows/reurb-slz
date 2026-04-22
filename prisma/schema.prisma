@@ -31,20 +31,36 @@ enum Role {
 // PROJETO REURB
 
 model ProjetoReurb {
-  id           String     @id @default(cuid())
+  id           String   @id @default(cuid())
   nome         String
   municipio    String
   estado       String
-  modalidade   Modalidade
-  criadoEm     DateTime   @default(now())
-  atualizadoEm DateTime   @updatedAt
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
 
-  campanhas Campanha[]
+  campanhas  Campanha[]
+  documentos DocumentoProjetoReurb[]
 }
 
-enum Modalidade {
-  SOCIAL
-  ESPECIFICO
+model DocumentoProjetoReurb {
+  id           String               @id @default(cuid())
+  projetoId    String
+  projeto      ProjetoReurb         @relation(fields: [projetoId], references: [id], onDelete: Cascade)
+  tipo         TipoDocumentoProjeto
+  supabasePath String
+  nomeOriginal String?
+  tamanhoBytes Int?
+  enviadoEm    DateTime             @default(now())
+}
+
+enum TipoDocumentoProjeto {
+  MEMORIAL_DESCRITIVO
+  FOTO_PROJETO
+  LEVANTAMENTO_TOPOGRAFICO
+  RELATORIO_AMBIENTAL
+  RELATORIO_URBANISTICO
+  RELATORIO_JURIDICO
+  RELATORIO_SOCIOECONOMICO
 }
 
 // CAMPANHA
