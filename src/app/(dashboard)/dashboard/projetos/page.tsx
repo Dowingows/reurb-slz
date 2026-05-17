@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export default async function ProjetosPage() {
   const projetos = await prisma.projetoReurb.findMany({
-    include: { _count: { select: { campanhas: true, documentos: true } } },
+    include: { _count: { select: { quadras: true, documentos: true } } },
     orderBy: { criadoEm: "desc" },
   });
 
@@ -31,7 +31,7 @@ export default async function ProjetosPage() {
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Estado / Cidade</TableHead>
-              <TableHead>Campanhas</TableHead>
+              <TableHead>Quadras</TableHead>
               <TableHead>Documentos</TableHead>
               <TableHead />
             </TableRow>
@@ -46,7 +46,7 @@ export default async function ProjetosPage() {
                   {p.municipio}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{p._count.campanhas}</Badge>
+                  <Badge variant="secondary">{p._count.quadras}</Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline">{p._count.documentos}</Badge>

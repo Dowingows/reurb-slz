@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { projetoSchema } from "@/schemas/projeto.schema";
+import { z } from "zod";
+
+const quadraSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  foto: z.string().optional(),
+});
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -10,13 +15,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   const { id } = await params;
-  const projeto = await prisma.projetoReurb.findUnique({
+  const quadra = await prisma.quadra.findUnique({
     where: { id },
-    include: { documentos: true, _count: { select: { quadras: true } } },
+    include: { _count: { select: { lotes: true } }, projeto: true },
   });
 
-  if (!projeto) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
-  return NextResponse.json(projeto);
+  if (!quadra) return NextResponse.json({ error: "Não encontrada" }, { status: 404 });
+  return NextResponse.json(quadra);
 }
 
 export async function PUT(req: NextRequest, { params }: Params) {
@@ -27,22 +32,22 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   const { id } = await params;
   const body = await req.json();
-  const parsed = projetoSchema.safeParse(body);
+  const parsed = quadraSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
   }
 
-  const projeto = await prisma.projetoReurb.update({ where: { id }, data: parsed.data });
-  return NextResponse.json(projeto);
+  const quadra = await prisma.quadra.update({ where: { id }, data: parsed.data });
+  return NextResponse.json(quadra);
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || !["SUPERVISOR", "ADMIN"].includes(session.user.role)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
   }
 
   const { id } = await params;
-  await prisma.projetoReurb.delete({ where: { id } });
+  await prisma.quadra.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }
