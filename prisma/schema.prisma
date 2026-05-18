@@ -7,7 +7,7 @@ datasource db {
   provider = "postgresql"
 }
 
-// AUTH / USUÁRIOS
+// ─── AUTH / USUÁRIOS ─────────────────────────────────────────────────────────
 
 model User {
   id        String   @id @default(cuid())
@@ -18,8 +18,7 @@ model User {
   ativo     Boolean  @default(true)
   criadoEm DateTime @default(now())
 
-  cadastros        Cadastro[]
-  campanhasAbertas Campanha[] @relation("CampanhaAbertaPor")
+  lotesCriados Lote[]
 }
 
 enum Role {
@@ -28,7 +27,7 @@ enum Role {
   ADMIN
 }
 
-// PROJETO REURB
+// ─── PROJETO REURB ────────────────────────────────────────────────────────────
 
 model ProjetoReurb {
   id           String   @id @default(cuid())
@@ -38,7 +37,7 @@ model ProjetoReurb {
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
-  campanhas  Campanha[]
+  quadras    Quadra[]
   documentos DocumentoProjetoReurb[]
 }
 
@@ -63,75 +62,110 @@ enum TipoDocumentoProjeto {
   RELATORIO_SOCIOECONOMICO
 }
 
-// CAMPANHA
+// ─── QUADRA ───────────────────────────────────────────────────────────────────
 
-model Campanha {
-  id           String         @id @default(cuid())
+model Quadra {
+  id           String       @id @default(cuid())
   projetoId    String
-  projeto      ProjetoReurb   @relation(fields: [projetoId], references: [id])
+  projeto      ProjetoReurb @relation(fields: [projetoId], references: [id], onDelete: Cascade)
   nome         String
-  bairro       String
-  status       StatusCampanha @default(RASCUNHO)
-  abertaPorId  String
-  abertaPor    User           @relation("CampanhaAbertaPor", fields: [abertaPorId], references: [id])
-  abertaEm     DateTime       @default(now())
-  encerradaEm  DateTime?
-  atualizadoEm DateTime       @updatedAt
+  foto         String?
+  criadoEm     DateTime     @default(now())
+  atualizadoEm DateTime     @updatedAt
 
-  lotes     Lote[]
-  cadastros Cadastro[]
+  lotes Lote[]
 }
 
-enum StatusCampanha {
-  RASCUNHO
-  ATIVA
-  ENCERRADA
-}
-
-// LOTE
+// ─── LOTE ─────────────────────────────────────────────────────────────────────
 
 model Lote {
-  id                   String   @id @default(cuid())
-  campanhaId           String
-  campanha             Campanha @relation(fields: [campanhaId], references: [id])
-  numeroLote           String
-  quadra               String
-  areaM2               Float
+  id                   String           @id @default(cuid())
+  quadraId             String
+  quadra               Quadra           @relation(fields: [quadraId], references: [id], onDelete: Cascade)
+  nomeLote             String
+  numeroSelagem        String?
+  rua                  String
+  numero               String
+  complemento          String?
+  area                 Float
+  areaDaEdificacao     Float
   inscricaoImobiliaria String?
-  confrontanteFrente   String?
-  confrontanteFundo    String?
-  confrontanteLd       String?
-  confrontanteLe       String?
-  medidaFrente         Float?
-  medidaFundo          Float?
-  medidaLd             Float?
-  medidaLe             Float?
-  coordenadas          Json?
+  usoDoLote            UsoDoLote
+  tipoDeConstrucao     TipoDeConstrucao
+  tipoDeUso            TipoDeUso
+  direitoReal          DireitoReal
+  observacao           String?
+  criadoPorId          String
+  criadoPor            User             @relation(fields: [criadoPorId], references: [id])
+  criadoEm             DateTime         @default(now())
+  atualizadoEm         DateTime         @updatedAt
 
-  cadastros Cadastro[]
-
-  @@unique([campanhaId, quadra, numeroLote])
+  proprietario Proprietario?
+  documentos   DocumentoLote?
+  benfeitorias Benfeitoria?
 }
 
-// BENEFICIÁRIO
+enum UsoDoLote {
+  RESIDENCIAL
+  COMERCIAL
+  MISTO
+  INSTITUCIONAL
+  INDUSTRIAL
+  VAGO
+}
 
-model Beneficiario {
-  id                String       @id @default(cuid())
-  nome              String
-  cpf               String       @unique
-  rg                String?
-  dataNascimento    DateTime?
-  estadoCivil       EstadoCivil?
-  conjugeNome       String?
-  conjugeCpf        String?
-  conjugeRg         String?
-  nis               String?
-  rendaFamiliar     Float?
-  possuiOutroImovel Boolean      @default(false)
-  criadoEm          DateTime     @default(now())
-  atualizadoEm      DateTime     @updatedAt
+enum TipoDeConstrucao {
+  ALVENARIA
+  MADEIRA
+  MISTA
+  METALICA
+  OUTROS
+}
 
-  cadastros Cadastro[]
+enum TipoDeUso {
+  PROPRIO
+  ALUGADO
+  CEDIDO
+  OCUPADO
+  OUTROS
+}
+
+enum DireitoReal {
+  CONCESSAO_USO
+  CONCESSAO_REAL_USO
+  LEGITIMACAO_FUNDIARIA
+  USUCAPIAO
+  OUTROS
+}
+
+// ─── PROPRIETÁRIO ─────────────────────────────────────────────────────────────
+
+model Proprietario {
+  id                    String      @id @default(cuid())
+  loteId                String      @unique
+  lote                  Lote        @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  nome                  String
+  nomeSocial            String?
+  cpf                   String      @unique
+  rg                    String?
+  nis                   String?
+  cnpj                  String?
+  email                 String?
+  celular               String
+  celular2              String?
+  filiacaoMaterna       String?
+  filiacaoPaterna       String?
+  estadoCivil           EstadoCivil
+  profissao             String
+  rendaIndividualMensal Float
+  rendaFamiliarMensal   Float
+  recebeBolsaFamilia    Boolean     @default(false)
+  recebeBPC             Boolean     @default(false)
+  isPCD                 Boolean     @default(false)
+  temPCDNaMoradia       Boolean     @default(false)
+  observacoes           String?
+  criadoEm              DateTime    @default(now())
+  atualizadoEm          DateTime    @updatedAt
 }
 
 enum EstadoCivil {
@@ -142,82 +176,97 @@ enum EstadoCivil {
   VIUVO
 }
 
-// CADASTRO
+// ─── DOCUMENTO DO LOTE ────────────────────────────────────────────────────────
 
-model Cadastro {
-  id                   String         @id @default(cuid())
-  uuidLocal            String         @unique
-  loteId               String
-  lote                 Lote           @relation(fields: [loteId], references: [id])
-  campanhaId           String
-  campanha             Campanha       @relation(fields: [campanhaId], references: [id])
-  beneficiarioId       String
-  beneficiario         Beneficiario   @relation(fields: [beneficiarioId], references: [id])
-  criadoPorId          String
-  criadoPor            User           @relation(fields: [criadoPorId], references: [id])
-
-  tempoPosseInicio     DateTime?
-  tipoAquisicao        TipoAquisicao?
-  linhaSucessoria      String?
-  declaracaoNaoLitigio Boolean        @default(false)
-
-  gpsLat      Float?
-  gpsLng      Float?
-  gpsAccuracy Float?
-
-  status         StatusCadastro @default(PENDENTE)
-  motivoRejeicao String?
-  revisadoPorId  String?
-  revisadoEm     DateTime?
-
-  criadoEm       DateTime  @default(now())
-  sincronizadoEm DateTime?
-  atualizadoEm   DateTime  @updatedAt
-
-  documentos Documento[]
+model DocumentoLote {
+  id                         String   @id @default(cuid())
+  loteId                     String   @unique
+  lote                       Lote     @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  rgFrente                   String?
+  rgVerso                    String?
+  cpfFoto                    String?
+  comprovanteResidencia      String?
+  certidaoNascimentoDivorcio String?
+  atualizadoEm               DateTime @updatedAt
 }
 
-enum StatusCadastro {
-  PENDENTE
-  APROVADO
-  REJEITADO
-  ARQUIVADO
+// ─── BENFEITORIA ──────────────────────────────────────────────────────────────
+
+model Benfeitoria {
+  id                                   String                    @id @default(cuid())
+  loteId                               String                    @unique
+  lote                                 Lote                      @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  estabilidadeEstrutura                EstabilidadeEstrutura?
+  necessidadeReconstrucao              NecessidadeReconstrucao?
+  numeroComodos                        Int?
+  numeroMoradoresPorComodo             Int?
+  numeroBanheiros                      Int?
+  condicoesBanheiros                   CondicoesBanheiros?
+  materialParedesExternas              MaterialParedesExternas?
+  condicoesParedesExternas             CondicoesParedesExternas?
+  cobertura                            Cobertura?
+  instalacoesEletricas                 String[]
+  condicoesInstalacoesEletricas        CondicoesInstalacoes?
+  instalacoesHidrossanitarias          String[]
+  condicoesInstalacoesHidrossanitarias CondicoesInstalacoes?
+  esgotamentoSanitario                 String[]
+  condicoesEsgotamentoSanitario        CondicoesEsgotamento?
+  atualizadoEm                         DateTime                  @updatedAt
 }
 
-enum TipoAquisicao {
-  COMPRA_VENDA
-  DOACAO
-  HERANCA
-  POSSE
+enum EstabilidadeEstrutura {
+  BOA
+  REGULAR
+  RUIM
+  PESSIMA
+}
+
+enum NecessidadeReconstrucao {
+  NAO
+  PARCIAL
+  TOTAL
+}
+
+enum CondicoesBanheiros {
+  BOM
+  REGULAR
+  RUIM
+}
+
+enum MaterialParedesExternas {
+  ALVENARIA
+  MADEIRA
+  MISTO
+  TAIPA
+  METALICO
   OUTROS
 }
 
-// DOCUMENTO
-
-model Documento {
-  id           String        @id @default(cuid())
-  cadastroId   String
-  cadastro     Cadastro      @relation(fields: [cadastroId], references: [id])
-  tipo         TipoDocumento
-  supabasePath String
-  nomeOriginal String?
-  tamanhoBytes Int?
-  conferido    Boolean       @default(false)
-  enviadoEm    DateTime      @default(now())
+enum CondicoesParedesExternas {
+  BOA
+  REGULAR
+  RUIM
 }
 
-enum TipoDocumento {
-  RG
-  CPF
-  RG_CONJUGE
-  CPF_CONJUGE
-  CERTIDAO_CASAMENTO
-  CERTIDAO_NASCIMENTO
-  COMPROVANTE_ENDERECO
-  COMPROVANTE_ENDERECO_IMOVEL
-  RECIBO_COMPRA_VENDA
-  DECLARACAO_POSSE
-  CERTIDAO_DEBITOS_MUNICIPAIS
-  NIS
+enum Cobertura {
+  LAJE
+  TELHA_CERAMICA
+  TELHA_FIBROCIMENTO
+  TELHA_METALICA
+  PALHA
   OUTROS
+}
+
+enum CondicoesInstalacoes {
+  BOA
+  REGULAR
+  RUIM
+  AUSENTE
+}
+
+enum CondicoesEsgotamento {
+  BOA
+  REGULAR
+  RUIM
+  AUSENTE
 }

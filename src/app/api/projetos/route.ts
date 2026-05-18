@@ -8,7 +8,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   const projetos = await prisma.projetoReurb.findMany({
-    include: { documentos: true, _count: { select: { campanhas: true } } },
+    include: { documentos: true, _count: { select: { quadras: true } } },
     orderBy: { criadoEm: "desc" },
   });
 
