@@ -14,14 +14,25 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "REURB-SLZ",
-  description: "Sistema de Regularização Fundiária Urbana",
+  title: "FundaUrb — IFMA",
+  description: "Sistema de Regularização Fundiária Urbana — Instituto Federal do Maranhão",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "FundaUrb",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <meta name="theme-color" content="#18181b" />
         {children}
       </body>
     </html>
