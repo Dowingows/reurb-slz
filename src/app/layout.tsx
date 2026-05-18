@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "REURB-SLZ",
-  description: "Sistema de Regularização Fundiária Urbana",
+  title: "FundaUrb — IFMA",
+  description: "Sistema de Regularização Fundiária Urbana — Instituto Federal do Maranhão",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

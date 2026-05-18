@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, MapPin } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,43 +40,58 @@ export default function LoginPage() {
 
       {/* ── Painel esquerdo — branding (desktop) ── */}
       <div className="hidden lg:flex flex-col justify-between bg-zinc-900 text-white p-12">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/10">
-              <MapPin className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold tracking-tight">REURB-SLZ</span>
+        <div className="space-y-6">
+          {/* Logo IFMA */}
+          <div className="bg-white rounded-2xl px-5 py-3 w-fit">
+            <Image
+              src="https://portal.ifma.edu.br/wp-content/uploads/2015/09/ifma_novo.jpg"
+              alt="Instituto Federal do Maranhão"
+              width={160}
+              height={60}
+              className="object-contain h-14 w-auto"
+              priority
+            />
           </div>
-          <div className="space-y-1 pl-1">
+
+          {/* Nome do sistema */}
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tight">FundaUrb</h1>
             <p className="text-zinc-300 text-lg font-medium">Regularização Fundiária Urbana</p>
-            <p className="text-zinc-500 text-sm">Sistema de gestão de projetos de regularização fundiária</p>
+            <p className="text-zinc-500 text-sm">Sistema de gestão de projetos, quadras e lotes</p>
           </div>
         </div>
 
         <blockquote className="border-l-2 border-zinc-600 pl-6">
           <p className="text-zinc-300 text-sm leading-relaxed">
-            Gerencie projetos, quadras e lotes. Cadastre proprietários,
-            documentos e benfeitorias diretamente do campo.
+            Cadastre proprietários, documentos e benfeitorias
+            diretamente do campo, com suporte a dispositivos móveis.
           </p>
         </blockquote>
 
-        <p className="text-zinc-500 text-sm">
-          Prefeitura de São Luís &middot; Maranhão
-        </p>
+        <div className="space-y-1">
+          <p className="text-zinc-400 text-sm font-medium">Instituto Federal do Maranhão</p>
+          <p className="text-zinc-600 text-xs">São Luís · Maranhão</p>
+        </div>
       </div>
 
       {/* ── Painel direito — formulário ── */}
       <div className="flex flex-col items-center justify-center p-8 lg:p-12 bg-white">
 
         {/* Banner mobile */}
-        <div className="lg:hidden w-full bg-zinc-900 text-white rounded-2xl p-6 mb-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/10">
-              <MapPin className="w-5 h-5 text-white" />
+        <div className="lg:hidden w-full bg-zinc-900 text-white rounded-2xl p-5 mb-10">
+          <div className="flex items-center gap-4 mb-3">
+            <div className="bg-white rounded-xl px-3 py-1.5">
+              <Image
+                src="https://portal.ifma.edu.br/wp-content/uploads/2015/09/ifma_novo.jpg"
+                alt="IFMA"
+                width={80}
+                height={30}
+                className="object-contain h-7 w-auto"
+              />
             </div>
-            <span className="text-xl font-bold tracking-tight">REURB-SLZ</span>
+            <span className="text-xl font-bold tracking-tight">FundaUrb</span>
           </div>
-          <p className="text-zinc-400 text-sm">Regularização Fundiária Urbana · São Luís, MA</p>
+          <p className="text-zinc-400 text-sm">Regularização Fundiária Urbana · IFMA · São Luís, MA</p>
         </div>
 
         <div className="w-full max-w-sm space-y-8">
