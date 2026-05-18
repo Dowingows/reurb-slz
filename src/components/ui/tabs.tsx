@@ -1,82 +1,103 @@
 "use client"
 
-import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
-import { cva, type VariantProps } from "class-variance-authority"
-
+import * as React from "react"
 import { cn } from "@/lib/utils"
 
-function Tabs({
-  className,
-  orientation = "horizontal",
-  ...props
-}: TabsPrimitive.Root.Props) {
-  return (
-    <TabsPrimitive.Root
-      data-slot="tabs"
-      data-orientation={orientation}
-      className={cn(
-        "group/tabs flex gap-2 data-horizontal:flex-col",
-        className
-      )}
-      {...props}
-    />
-  )
+type TabsContextType = {
+  value: string
+  onValueChange: (value: string) => void
 }
 
-const tabsListVariants = cva(
-  "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-horizontal/tabs:h-8 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col data-[variant=line]:rounded-none",
-  {
-    variants: {
-      variant: {
-        default: "bg-muted",
-        line: "gap-1 bg-transparent",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
+const TabsContext = React.createContext<TabsContextType | null>(null)
+
+function useTabs() {
+  const ctx = React.useContext(TabsContext)
+  if (!ctx) throw new Error("Tabs components must be used within <Tabs>")
+  return ctx
+}
+
+interface TabsProps {
+  defaultValue?: string
+  value?: string
+  onValueChange?: (value: string) => void
+  className?: string
+  children: React.ReactNode
+}
+
+function Tabs({ defaultValue, value: controlledValue, onValueChange, className, children }: TabsProps) {
+  const [uncontrolled, setUncontrolled] = React.useState(defaultValue ?? "")
+  const value = controlledValue ?? uncontrolled
+  const handleChange = (v: string) => {
+    setUncontrolled(v)
+    onValueChange?.(v)
   }
-)
-
-function TabsList({
-  className,
-  variant = "default",
-  ...props
-}: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
   return (
-    <TabsPrimitive.List
-      data-slot="tabs-list"
-      data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
-      {...props}
-    />
+    <TabsContext.Provider value={{ value, onValueChange: handleChange }}>
+      <div data-slot="tabs" className={cn("flex flex-col", className)}>
+        {children}
+      </div>
+    </TabsContext.Provider>
   )
 }
 
-function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
+function TabsList({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <TabsPrimitive.Tab
+    <div
+      data-slot="tabs-list"
+      role="tablist"
+      className={cn("flex border-b border-border", className)}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}
+
+interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  value: string
+}
+
+function TabsTrigger({ value, className, children, ...props }: TabsTriggerProps) {
+  const { value: activeValue, onValueChange } = useTabs()
+  const isActive = activeValue === value
+  return (
+    <button
       data-slot="tabs-trigger"
+      role="tab"
+      type="button"
+      aria-selected={isActive}
+      onClick={() => onValueChange(value)}
       className={cn(
-        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 aria-disabled:pointer-events-none aria-disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-sm group-data-[variant=line]/tabs-list:data-active:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent",
-        "data-active:bg-background data-active:text-foreground dark:data-active:border-input dark:data-active:bg-input/30 dark:data-active:text-foreground",
-        "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
+        "px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px",
+        isActive
+          ? "border-primary text-foreground"
+          : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/40",
         className
       )}
       {...props}
-    />
+    >
+      {children}
+    </button>
   )
 }
 
-function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
+interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  value: string
+}
+
+function TabsContent({ value, className, children, ...props }: TabsContentProps) {
+  const { value: activeValue } = useTabs()
+  if (activeValue !== value) return null
   return (
-    <TabsPrimitive.Panel
+    <div
       data-slot="tabs-content"
-      className={cn("flex-1 text-sm outline-none", className)}
+      role="tabpanel"
+      className={cn("outline-none", className)}
       {...props}
-    />
+    >
+      {children}
+    </div>
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants }
+export { Tabs, TabsList, TabsTrigger, TabsContent }

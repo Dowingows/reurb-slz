@@ -22,26 +22,26 @@ interface Props {
 export function LoteTabs({ lote, projetoId, quadraId }: Props) {
   return (
     <Tabs defaultValue="informacoes" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList>
         <TabsTrigger value="informacoes">Informações</TabsTrigger>
         <TabsTrigger value="proprietario">Proprietário</TabsTrigger>
         <TabsTrigger value="documentos">Documentos</TabsTrigger>
         <TabsTrigger value="benfeitorias">Benfeitorias</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="informacoes" className="mt-6">
+      <TabsContent value="informacoes" className="pt-6">
         <AbaInformacoes lote={lote} projetoId={projetoId} quadraId={quadraId} />
       </TabsContent>
 
-      <TabsContent value="proprietario" className="mt-6">
+      <TabsContent value="proprietario" className="pt-6">
         <AbaProprietario loteId={lote.id} proprietario={lote.proprietario} />
       </TabsContent>
 
-      <TabsContent value="documentos" className="mt-6">
+      <TabsContent value="documentos" className="pt-6">
         <AbaDocumentos loteId={lote.id} documentos={lote.documentos} />
       </TabsContent>
 
-      <TabsContent value="benfeitorias" className="mt-6">
+      <TabsContent value="benfeitorias" className="pt-6">
         <AbaBenfeitorias loteId={lote.id} benfeitorias={lote.benfeitorias} />
       </TabsContent>
     </Tabs>
