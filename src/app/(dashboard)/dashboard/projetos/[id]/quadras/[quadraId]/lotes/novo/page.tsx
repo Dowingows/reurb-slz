@@ -31,7 +31,8 @@ export default function NovoLotePage() {
     });
 
     if (!res.ok) {
-      toast.error("Erro ao criar lote");
+      const body = await res.json().catch(() => ({}));
+      toast.error(`Erro ao criar lote: ${body?.error ? JSON.stringify(body.error) : res.statusText}`);
       return;
     }
 
